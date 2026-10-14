@@ -1,0 +1,645 @@
+/*
+ * Sylvan — Typora 主题
+ * 设计规范：docs/Sylvan-design.md
+ *
+ * 风格：现代技术出版物。低饱和青绿强调、中性表面、纯排版式标题。
+ * 约束：不打包字体、集中变量管理、明暗语义映射、对比度经验证、打印样式独立。
+ */
+
+/* ==========================================================================
+   1. 设计变量 —— 浅色模式（默认）
+   ========================================================================== */
+
+:root {
+  /* 表面与文字 */
+  --bg-color: #FFFFFF;              /* 页面背景：纯白（原 #FAFAF9，观感更亮，对比度只升不降） */
+  --text-color: #242424;            /* 正文：深灰 */
+  --text-secondary: #6F6F6F;        /* 次级文字：辅助信息 */
+  --border-color: #E5E7EB;          /* 分隔线 / 组件边界 */
+
+  /* 强调与链接（对比度经脚本验证，见主题开发记录） */
+  --accent-color: #399688;          /* 少量重点与交互元素（复选框、焦点） */
+  --link-color: #237A6D;            /* 链接：比强调色适配文字亮度上限，同色相，≥4.5:1 */
+  --link-color-hover: #1C6257;      /* 链接悬停：加深 */
+
+  /* 代码表面 */
+  --code-bg: #F1F3F5;               /* 代码块背景 */
+  --code-border: #E0E3E6;           /* 代码块细边框 */
+  --inline-code-bg: #E6F2EE;        /* 行内代码：极浅青绿 */
+
+  /* 引用与表格 */
+  --blockquote-bg: var(--code-bg);  /* 引用块背景与代码块一致 */
+  --blockquote-border: var(--accent-color); /* 引用块左侧细线：强调色 */
+  --table-header-bg: #F1F3F5;       /* 表头浅灰背景 */
+
+  /* 局部滚动条（代码块 / 表格 / 长公式） */
+  --scrollbar-thumb: #D3D6D9;
+  --scrollbar-thumb-hover: #C1C5C9;
+
+  /* 代码块语言标签（次级灰，对代码块背景 ≥4.5:1） */
+  --code-lang-color: #686E74;
+
+  /* 选区与焦点 */
+  --selection-bg: #CDE4E0;          /* 文本选区：浅青绿 */
+  --focus-color: #438A80;
+
+  /* 高亮标记 ==text==：<mark> */
+  --mark-bg: #F3E5B8;               /* 浅青绿底，非默认亮黄 */
+
+  /* 语法高亮（低饱和，类别语义与深色模式一致） */
+  --syntax-keyword: #35726A;        /* 关键字：低饱和青绿 */
+  --syntax-string: #7D6829;         /* 字符串：柔和橄榄 */
+  --syntax-function: #3D6B8F;       /* 函数名：蓝灰 */
+  --syntax-comment: #686E74;        /* 注释：中性灰 */
+  --syntax-number: #8A5540;         /* 数字 / 常量：柔和赭 */
+
+  /* 字体 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", "Noto Sans Mono CJK SC", monospace;
+
+  /* 排版 */
+  --font-size-base: 16px;
+  --line-height-base: 1.75;
+  --content-width: 800px;           /* 设计目标行宽 760–820px */
+  --p-spacing: 14px;                /* 段落间距 12–16px */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --spacing-unit: 4px;
+}
+
+/* ==========================================================================
+   2. 设计变量 —— 深色模式（语义映射，非反转）
+      两条路径：预览工作台的 html[data-color-scheme] 手动切换；
+      Typora 中跟随系统的 prefers-color-scheme。手动属性优先。
+   ========================================================================== */
+
+html[data-color-scheme='dark'] {
+  --bg-color: #212325;              /* 深灰，不用纯黑 */
+  --text-color: #E7E7E4;            /* 柔和浅灰白 */
+  --text-secondary: #9FA5A7;
+  --border-color: #3A3D3E;
+
+  --accent-color: #6FB3A8;          /* 青绿提亮，避免刺眼 */
+  --link-color: #83C0B5;            /* 独立校准，≥4.5:1 */
+  --link-color-hover: #A3D5CC;
+
+  --code-bg: #292C2D;               /* 与页面保持适度明度差 */
+  --code-border: #3A3D3E;
+  --inline-code-bg: #2B2E2F;
+
+  --blockquote-bg: var(--code-bg);
+  --blockquote-border: #6FB3A8;
+  --table-header-bg: #292C2D;
+
+  --scrollbar-thumb: #45494C;
+  --scrollbar-thumb-hover: #565B5E;
+
+  --code-lang-color: #939A9E;
+
+  --selection-bg: #2F5450;
+  --focus-color: #6FB3A8;
+
+  --mark-bg: #31504B;               /* 低亮度青绿底 */
+
+  --syntax-keyword: #7DBDB1;
+  --syntax-string: #C0B078;
+  --syntax-function: #8FB4D4;
+  --syntax-comment: #939A9E;
+  --syntax-number: #D09A85;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-color-scheme='light']) {
+    --bg-color: #212325;
+    --text-color: #E7E7E4;
+    --text-secondary: #9FA5A7;
+    --border-color: #3A3D3E;
+
+    --accent-color: #6FB3A8;
+    --link-color: #83C0B5;
+    --link-color-hover: #A3D5CC;
+
+    --code-bg: #292C2D;
+    --code-border: #3A3D3E;
+    --inline-code-bg: #2B2E2F;
+
+    --blockquote-bg: var(--code-bg);
+    --blockquote-border: #6FB3A8;
+    --table-header-bg: #292C2D;
+
+    --scrollbar-thumb: #45494C;
+    --scrollbar-thumb-hover: #565B5E;
+
+    --code-lang-color: #939A9E;
+
+    --selection-bg: #2F5450;
+    --focus-color: #6FB3A8;
+
+    --mark-bg: #31504B;             /* 低亮度青绿底 */
+
+    --syntax-keyword: #7DBDB1;
+    --syntax-string: #C0B078;
+    --syntax-function: #8FB4D4;
+    --syntax-comment: #939A9E;
+    --syntax-number: #D09A85;
+  }
+}
+
+/* ==========================================================================
+   3. 基础排版
+   ========================================================================== */
+
+html {
+  font-size: var(--font-size-base);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-color);
+  background: var(--bg-color);
+  -webkit-font-smoothing: antialiased;
+}
+
+#write {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 40px 24px 96px;
+  font-size: 1rem;
+  line-height: var(--line-height-base);
+  color: var(--text-color);
+  background: var(--bg-color);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+p {
+  margin: var(--p-spacing) 0;
+  line-height: var(--line-height-base);
+}
+
+/* 长内容安全换行，不撑破布局 */
+p, li {
+  overflow-wrap: break-word;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--text-color);
+}
+
+/* 高亮标记 ==text==：克制的高亮，不使用默认亮黄 */
+mark {
+  background: var(--mark-bg);
+  color: var(--text-color);
+  padding: 0 2px;
+  border-radius: var(--radius-sm);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   4. 标题 —— H1 短强调线 / H2 细分隔线 / H3–H6 纯排版
+   ========================================================================== */
+
+#write h1, #write h2, #write h3,
+#write h4, #write h5, #write h6 {
+  color: var(--text-color);
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 24px 0 10px;
+}
+
+#write h1 {
+  font-size: 1.875rem;      /* 30px */
+  font-weight: 700;
+  margin: 32px 0 16px;
+}
+
+/* H1 下方：短强调线，约 40–56px 宽、3px 厚、圆角端点 */
+#write h1::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin-top: 10px;
+  background: var(--accent-color);
+  border-radius: 999px;
+}
+
+#write h2 {
+  font-size: 1.5rem;        /* 24px */
+  margin-top: 32px;         /* 主要章节分界留白 */
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color); /* 浅灰细分隔线 */
+}
+
+#write h3 { font-size: 1.25rem; }   /* 20px */
+#write h4 { font-size: 1.125rem; }  /* 18px */
+#write h5 { font-size: 1rem; }      /* 16px */
+#write h6 {
+  font-size: 0.9375rem;     /* 15px */
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   5. 链接与交互状态
+   ========================================================================== */
+
+a,
+.md-link a {
+  color: var(--link-color);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--link-color-hover);
+  text-decoration-thickness: 1.5px;
+}
+
+/* ==========================================================================
+   6. 列表与任务列表
+   ========================================================================== */
+
+#write ul, #write ol {
+  margin: var(--p-spacing) 0;
+  padding-left: 1.6em;
+}
+
+#write li {
+  margin: 4px 0;
+}
+
+#write li > p {
+  margin: 4px 0;
+}
+
+/* 任务列表：复选框用强调色；已完成项中性灰 + 轻删除线 */
+#write .task-list-item {
+  list-style-type: none;
+}
+
+#write .task-list-item input[type='checkbox'] {
+  accent-color: var(--accent-color);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+#write li.task-list-item > input:checked ~ *,
+#write li.task-list-item > input:checked + label {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+/* ==========================================================================
+   7. 引用块 —— 极浅灰背景 + 左侧细线，不做提示卡推断
+   ========================================================================== */
+
+#write blockquote {
+  margin: var(--p-spacing) 0;
+  padding: 8px 16px;
+  background: var(--blockquote-bg);
+  border-left: 3px solid var(--blockquote-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-color);
+}
+
+#write blockquote p {
+  margin: 6px 0;
+}
+
+/* ==========================================================================
+   8. 水平分隔线 —— 1px 浅灰，无装饰
+   ========================================================================== */
+
+#write hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 32px 0;
+}
+
+/* ==========================================================================
+   9. 代码 —— 行内代码与代码块
+   ========================================================================== */
+
+#write code,
+#write tt {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+/* 行内代码：极浅灰背景、轻微圆角、无边框、文字保持深灰 */
+#write :not(pre) > code {
+  background: var(--inline-code-bg);
+  border-radius: var(--radius-sm);
+  padding: 2px 5px;
+  color: var(--text-color);
+}
+
+/* 代码块：浅灰背景、细边框、克制圆角、局部横向滚动 */
+#write pre,
+#write pre.md-fences {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin: var(--p-spacing) 0;
+  overflow-x: auto;
+  line-height: 1.6;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--text-color);
+}
+
+#write pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* 代码块语言标签：顶部左侧，小字号次级灰，下方一条浅色细分隔线；
+   无语言标识（无 lang 或空值）时不显示；Mermaid 图表块不显示 */
+#write pre.md-fences[lang]:not([lang='']):not(.md-fences-mermaid):not(.md-fences-advanced)::before {
+  content: attr(lang);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--code-lang-color);
+  padding-bottom: 8px;
+  margin: 0 0 12px;
+  border-bottom: 1px solid var(--code-border);
+}
+
+/* Typora 编辑器中代码块由 CodeMirror 渲染，每行是嵌套的 <pre class="CodeMirror-line">。
+   必须重置嵌套 pre，否则每一行都会继承代码块外观（背景/边框/内边距/外边距），
+   变成一行一个卡片。导出 HTML 无嵌套 pre，此规则不影响导出结果。 */
+#write pre pre,
+#write pre.CodeMirror-line,
+#write .CodeMirror pre {
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  overflow: visible;
+}
+
+/* Typora 编辑态适配：
+   1. 代码块完整展开，不在内部上下滚动 —— pre 与 CodeMirror 都不限高，
+      横向滚动仍由 CodeMirror 自己的 .CodeMirror-scroll 处理；
+   2. 隐藏聚焦时代码块右下角自带的语言 tooltip（语言已由顶部标签展示） */
+#write pre.md-fences.ty-contain-cm {
+  height: auto !important;
+  overflow: visible;
+}
+
+#write pre.md-fences .CodeMirror {
+  height: auto !important;
+}
+
+#write pre.md-fences .code-tooltip {
+  display: none;
+}
+
+/* 滚动条：代码块 / 表格 / 长公式等局部滚动区域，
+   细条 + 中性灰，融入主题表面风格；暗色单独校准 */
+#write pre,
+#write table,
+#write .katex-display,
+#write .mathjax-block {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+#write pre::-webkit-scrollbar,
+#write table::-webkit-scrollbar,
+#write .katex-display::-webkit-scrollbar,
+#write .mathjax-block::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+#write pre::-webkit-scrollbar-track,
+#write table::-webkit-scrollbar-track,
+#write .katex-display::-webkit-scrollbar-track,
+#write .mathjax-block::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#write pre::-webkit-scrollbar-thumb,
+#write table::-webkit-scrollbar-thumb,
+#write .katex-display::-webkit-scrollbar-thumb,
+#write .mathjax-block::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+
+#write pre::-webkit-scrollbar-thumb:hover,
+#write table::-webkit-scrollbar-thumb:hover,
+#write .katex-display::-webkit-scrollbar-thumb:hover,
+#write .mathjax-block::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* 语法高亮（highlight.js 导出 / 预览）——低饱和，类别语义固定 */
+#write .hljs-keyword,
+#write .hljs-selector-tag,
+#write .hljs-literal { color: var(--syntax-keyword); }
+
+#write .hljs-string,
+#write .hljs-attr { color: var(--syntax-string); }
+
+#write .hljs-title,
+#write .hljs-title.function_,
+#write .hljs-built_in { color: var(--syntax-function); }
+
+#write .hljs-comment,
+#write .hljs-quote { color: var(--syntax-comment); font-style: italic; }
+
+#write .hljs-number,
+#write .hljs-symbol { color: var(--syntax-number); }
+
+#write .hljs-type,
+#write .hljs-title.class_,
+#write .hljs-class .hljs-title { color: var(--syntax-function); }
+
+/* CodeMirror（Typora 编辑态代码块）使用同一套语义色 */
+.cm-s-inner .cm-keyword { color: var(--syntax-keyword); }
+.cm-s-inner .cm-string,
+.cm-s-inner .cm-attribute { color: var(--syntax-string); }
+.cm-s-inner .cm-variable-3,
+.cm-s-inner .cm-def { color: var(--syntax-function); }
+.cm-s-inner .cm-comment { color: var(--syntax-comment); font-style: italic; }
+.cm-s-inner .cm-number { color: var(--syntax-number); }
+
+/* ==========================================================================
+   10. 表格 —— 轻表头、细横线、无竖向网格
+   ========================================================================== */
+
+#write table {
+  border-collapse: collapse;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: var(--p-spacing) 0;
+  font-size: 0.9375rem;
+}
+
+#write th,
+#write td {
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  vertical-align: top;
+  color: var(--text-color);
+}
+
+#write thead th {
+  background: var(--table-header-bg);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+}
+
+#write table th:first-child,
+#write table td:first-child {
+  padding-left: 12px;
+}
+
+/* 去掉 Typora 默认可能存在的外框与竖线 */
+#write table, #write th, #write td {
+  border-left: none;
+  border-right: none;
+}
+
+/* ==========================================================================
+   11. 图片 —— 居中、自适应、无装饰
+   ========================================================================== */
+
+#write img {
+  max-width: 100%;
+  height: auto;
+}
+
+#write .md-image {
+  display: block;
+  text-align: center;
+  margin: 16px 0;
+}
+
+#write .md-image > img,
+#write p > img:only-child {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   12. 数学公式与 Mermaid —— 融入正文，无外框
+   ========================================================================== */
+
+#write .katex-display,
+#write .mathjax-block {
+  margin: 16px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+}
+
+#write .md-diagram,
+#write pre.md-fences-mermaid {
+  background: none;
+  border: none;
+  padding: 8px 0;
+  text-align: center;
+}
+
+#write .md-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==========================================================================
+   13. 脚注
+   ========================================================================== */
+
+#write .footnotes {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.875em;
+  color: var(--text-secondary);
+}
+
+#write .footnotes li {
+  margin: 4px 0;
+}
+
+#write .footnote-ref a,
+#write .footnote-backref {
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   14. 打印与 PDF 导出 —— 白底深字，结构优先
+   ========================================================================== */
+
+@media print {
+  :root {
+    --bg-color: #FFFFFF;
+    --text-color: #242424;
+    --link-color: #2F6159;
+    --code-bg: #F6F7F8;
+    --inline-code-bg: #E6F2EE;
+    --blockquote-bg: var(--code-bg);
+    --table-header-bg: #F2F3F4;
+  }
+
+  html {
+    background: #fff;
+  }
+
+  body, #write {
+    background: #fff;
+    color: #242424;
+  }
+
+  #write {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  a {
+    color: #2F6159;
+  }
+
+  /* 避免标题与正文分离、代码与表格被拆页 */
+  #write h1, #write h2, #write h3,
+  #write h4, #write h5, #write h6 {
+    break-after: avoid-page;
+  }
+
+  #write pre, #write blockquote,
+  #write table, #write li {
+    break-inside: avoid-page;
+  }
+
+  #write tr {
+    break-inside: avoid;
+  }
+}
