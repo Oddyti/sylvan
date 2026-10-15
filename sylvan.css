@@ -369,7 +369,9 @@ a:hover {
 }
 
 /* 代码块语言标签：顶部左侧，小字号次级灰，下方一条浅色细分隔线；
-   无语言标识（无 lang 或空值）时不显示；Mermaid 图表块不显示 */
+   无语言标识（无 lang 或空值）时不显示；Mermaid 图表块不显示。
+   标签位于滚动容器外（限高滚动的是内部 code / .CodeMirror）,
+   因此它是固定头部，不参与滚动 */
 #write pre.md-fences[lang]:not([lang='']):not(.md-fences-mermaid):not(.md-fences-advanced)::before {
   content: attr(lang);
   display: block;
@@ -401,12 +403,13 @@ a:hover {
 }
 
 /* Typora 编辑态适配：
-   1. 代码块完整展开，不在内部上下滚动 —— pre 与 CodeMirror 都不限高，
+   1. 代码块自动高度（覆盖 Typora 聚焦时设置的固定行高），
+      这样长代码块在限高后也能纵向滚动查看全部内容（见下方限高规则），
       横向滚动仍由 CodeMirror 自己的 .CodeMirror-scroll 处理；
    2. 隐藏聚焦时代码块右下角自带的语言 tooltip（语言已由顶部标签展示） */
 #write pre.md-fences.ty-contain-cm {
   height: auto !important;
-  overflow: visible;
+  overflow: auto;
 }
 
 #write pre.md-fences .CodeMirror {
@@ -417,9 +420,88 @@ a:hover {
   display: none;
 }
 
+/* 代码块选中颜色：CodeMirror 编辑态的选中区是自己画的覆盖层
+   （.CodeMirror-selected，默认蓝紫色），不吃原生 ::selection，
+   显式覆盖为主题选区色，与正文选中体验统一 */
+#write .CodeMirror-selected,
+#write .CodeMirror-focused .CodeMirror-selected {
+  background: var(--selection-bg) !important;
+}
+
+#write .CodeMirror-line::selection,
+#write .CodeMirror-line > span::selection,
+#write .CodeMirror-line > span > span::selection {
+  background: var(--selection-bg);
+}
+
+/* 代码块限高滚动——双轨：
+   ① 预览 / 导出结构（pre > code）：滚动容器是内部 code，标签天然在滚动区外，
+      构成固定头部，只有标签下方的内容滚动；
+   ② Typora 编辑态（ty-contain-cm）：CodeMirror 的 contain 机制把行高内联写在 pre，
+      限高/滚动只能施加在 pre 自身（配合 height:auto !important 覆盖内联高度）。
+      两套结构均已实测：子元素限高在 Typora 里会被 overflow:hidden 的 CodeMirror
+      包裹层静默裁切，既无滚动也无法编辑；pre 级限高则正常滚动。
+   阈值：约 24 行（24 × 1.6 = 38.4em，以代码字号计）。
+   （不做 hover/focus 展开：与限高滚动语义冲突；按钮控制需要 JS，纯主题无法实现。）
+   Mermaid / 高级图表块不限高，避免图形被截断。 */
+#write pre.md-fences:not(.md-fences-mermaid):not(.md-fences-advanced) > code {
+  display: block;
+  max-height: 38.4em;
+  overflow: auto;
+}
+
+#write pre.md-fences.ty-contain-cm:not(.md-fences-mermaid):not(.md-fences-advanced) {
+  max-height: 38.4em;
+}
+
+/* 编辑态标签钉顶：pre 是滚动容器，标签用 sticky 固定在顶部。
+   z-index:10 必须高于 CodeMirror 库给 .CodeMirror-scroll 的 z-index:3，
+   否则代码行会从标签上方穿过（早期“穿过突兀”的真正原因）。
+   两个关键点配合，实现“从第一像素就完全钉死 + 盖住滚动口顶端”：
+   ① 下方规则把 pre 的 padding-top 归零——sticky 的吸附基准不是滚动口
+      边缘，而是再向内缩掉滚动容器自身 padding 的矩形；只要 pre 还有
+      padding-top，标签吸附线就在内容盒顶部，要么留出一条永远盖不住
+      的缝（top:0），要么开头先跟随上滚一段才吸住（top:-16px）。
+   ② 标签自带 padding-top:16px 接管原留白：静止时文字位置与原先一致，
+      滚动时吸附线就是滚动口边缘，top:0 全程零位移，标签背景从第一
+      像素起盖住整个顶端。
+   背景遮两层：① var(--code-bg) 遮住从标签下方穿过的代码行；
+   ② 负 margin 拉宽 + 补偿 padding，把背景扩展到 pre 左右内边距条带 ——
+   Typora 实测 CodeMirror 文字会水平溢出内容盒约 11px，
+   若只盖内容盒宽度，穿行代码会从标签两侧漏出。
+   预览 / 导出结构无 .ty-contain-cm，不受此规则影响。 */
+#write pre.md-fences.ty-contain-cm[lang]:not([lang='']):not(.md-fences-mermaid):not(.md-fences-advanced)::before {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--code-bg);
+  margin-left: -16px;
+  margin-right: -16px;
+  padding-top: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* 配套规则：有语言标签的编辑态代码块去掉 pre 的 padding-top（见上），
+   让 sticky 吸附基准落在滚动口边缘；无标签（无 lang / 空 lang）及
+   图表块不受影响，保留原始留白 */
+#write pre.md-fences.ty-contain-cm[lang]:not([lang='']):not(.md-fences-mermaid):not(.md-fences-advanced) {
+  padding-top: 0;
+}
+
+/* 滚动链隔离：代码块内滚动到顶部/底部后，继续滚动不再直接驱动整个文档，
+   需将光标移出代码块才能滚动页面。
+   预览态滚动容器是内部 code，编辑态是 pre 自身与 CodeMirror 的滚动层。 */
+#write pre.md-fences,
+#write pre.md-fences > code,
+#write pre.md-fences .CodeMirror-scroll {
+  overscroll-behavior: contain;
+}
+
 /* 滚动条：代码块 / 表格 / 长公式等局部滚动区域，
    细条 + 中性灰，融入主题表面风格；暗色单独校准 */
 #write pre,
+#write pre code,
 #write table,
 #write .katex-display,
 #write .mathjax-block {
@@ -428,6 +510,7 @@ a:hover {
 }
 
 #write pre::-webkit-scrollbar,
+#write pre code::-webkit-scrollbar,
 #write table::-webkit-scrollbar,
 #write .katex-display::-webkit-scrollbar,
 #write .mathjax-block::-webkit-scrollbar {
@@ -436,6 +519,7 @@ a:hover {
 }
 
 #write pre::-webkit-scrollbar-track,
+#write pre code::-webkit-scrollbar-track,
 #write table::-webkit-scrollbar-track,
 #write .katex-display::-webkit-scrollbar-track,
 #write .mathjax-block::-webkit-scrollbar-track {
@@ -443,6 +527,7 @@ a:hover {
 }
 
 #write pre::-webkit-scrollbar-thumb,
+#write pre code::-webkit-scrollbar-thumb,
 #write table::-webkit-scrollbar-thumb,
 #write .katex-display::-webkit-scrollbar-thumb,
 #write .mathjax-block::-webkit-scrollbar-thumb {
@@ -451,6 +536,7 @@ a:hover {
 }
 
 #write pre::-webkit-scrollbar-thumb:hover,
+#write pre code::-webkit-scrollbar-thumb:hover,
 #write table::-webkit-scrollbar-thumb:hover,
 #write .katex-display::-webkit-scrollbar-thumb:hover,
 #write .mathjax-block::-webkit-scrollbar-thumb:hover {
@@ -632,6 +718,20 @@ a:hover {
   #write h1, #write h2, #write h3,
   #write h4, #write h5, #write h6 {
     break-after: avoid-page;
+  }
+
+  /* 导出 / 打印：代码块完整输出，不受限高滚动影响；
+     同时取消编辑态标签的 sticky 钉顶（打印无滚动） */
+  #write pre.md-fences,
+  #write pre.md-fences > code,
+  #write pre.md-fences .CodeMirror,
+  #write pre.md-fences .CodeMirror-scroll {
+    max-height: none !important;
+    overflow: visible;
+  }
+
+  #write pre.md-fences.ty-contain-cm::before {
+    position: static;
   }
 
   #write pre, #write blockquote,
