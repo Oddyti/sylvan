@@ -6,9 +6,13 @@
 
 ![Typora](https://img.shields.io/badge/Typora-%E2%89%A51.0-438A80.svg) ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg) [![License: MIT](https://img.shields.io/badge/license-MIT-438A80.svg)](LICENSE)
 
-![Sylvan 浅色模式预览](assets/preview-cn.png)
+![Sylvan 浅色模式预览](assets/preview-light.png)
 
-*浅色模式——默认外观：克制的底色、H1 下的强调短线、带语言标签的代码块。*
+*浅色模式——默认外观：克制的底色、H1 下的强调短线、层级分明的标题体系。*
+
+![Sylvan 深色模式预览](assets/preview-dark.png)
+
+*深色模式——独立校准的语义映射，而非简单反转。*
 
 ## 特性
 

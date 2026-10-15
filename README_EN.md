@@ -6,9 +6,13 @@ A Typora theme in the style of modern technical publications — the precision o
 
 ![Typora](https://img.shields.io/badge/Typora-%E2%89%A51.0-438A80.svg) ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg) [![License: MIT](https://img.shields.io/badge/license-MIT-438A80.svg)](LICENSE)
 
-![Sylvan light-mode preview](assets/preview-en.png)
+![Sylvan light-mode preview](assets/preview-light.png)
 
-*Light mode — the default look: quiet surfaces, an accent line under H1 and a language-labelled code block.*
+*Light mode — the default look: quiet surfaces, an accent line under H1, a clear typographic hierarchy.*
+
+![Sylvan dark-mode preview](assets/preview-dark.png)
+
+*Dark mode — independently calibrated semantic colors, not a simple inversion.*
 
 ## Features
 
