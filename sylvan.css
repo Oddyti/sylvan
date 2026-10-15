@@ -1,6 +1,12 @@
 /*
- * Sylvan — Typora 主题
- * 设计规范：docs/Sylvan-design.md
+ * Sylvan — Typora Theme
+ *
+ * Author:      oddyti
+ * Theme Name:  Sylvan
+ * Description: Modern technical-publication style. Light/dark modes,
+ *              verified contrast, height-limited code blocks with a
+ *              pinned language label. Single CSS file, zero assets.
+ * Link:        https://github.com/oddyti/sylvan
  *
  * 风格：现代技术出版物。低饱和青绿强调、中性表面、纯排版式标题。
  * 约束：不打包字体、集中变量管理、明暗语义映射、对比度经验证、打印样式独立。
